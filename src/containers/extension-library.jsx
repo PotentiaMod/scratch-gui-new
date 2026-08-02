@@ -1,0 +1,386 @@
+//This entire code is taken from NitroBolt.
+import bindAll from 'lodash.bindall';
+import PropTypes from 'prop-types';
+import React from 'react';
+import VM from 'scratch-vm';
+import {defineMessages, injectIntl, intlShape} from 'react-intl';
+import log from '../lib/log';
+
+import extensionLibraryContent, {
+    galleryStatusItems
+} from '../lib/libraries/extensions/index.jsx';
+import extensionTags from '../lib/libraries/tw-extension-tags';
+
+import LibraryComponent from '../components/library/library.jsx';
+import extensionIcon from '../components/action-menu/icon--sprite.svg';
+
+const gallerySources = [		
+    {
+        id: 'turbowarp',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/turbowarp/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/turbowarp/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/turbowarp/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/tw-extensions.json',
+        tag: 'tw'
+    },
+    {
+        id: 'nitrobolt',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/nitrobolt/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/nitrobolt/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/nitrobolt/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/nb-extensions.json',
+        tag: 'nb'
+    },
+    {
+        id: 'astraeditor',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/astraeditor/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/astraeditor/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/astraeditor/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/ae-extensions.json',
+        tag: 'ae'
+    },	
+	{
+        id: 'zerotwoengine',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/zerotwoengine/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/zerotwoengine/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/zerotwoengine/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/ztengine-extensions.json',
+        tag: 'ztengine'
+    },	
+    {
+        id: 'bilup',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/bilup/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/bilup/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/bilup/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/bilup-extensions.json',
+        tag: 'bilup'
+    },	
+	{
+        id: 'mistium',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/mistium/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/mistium/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/mistium/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/mist-extensions.json',
+        tag: 'mist'
+    },
+	{
+        id: 'acidmod',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/acidmod/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/acidmod/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/acidmod/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/am-extensions.json',
+        tag: 'acid'
+    },
+	{
+        id: 'dash',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/dash/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/dash/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/dash/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/dash-extensions.json',
+        tag: 'dash'
+    },
+	{
+        id: 'sharkpool',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/sharkpool/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/sharkpool/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/sharkpool/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/sp-extensions.json',
+        tag: 'sp'
+    },
+    {
+        id: 'penguinmod',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/penguinmod/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/penguinmod/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/penguinmod/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/pm-extensions.json',
+        tag: 'pm'
+    },
+	{
+        id: 'snailide',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/snailide/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/snailide/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/snailide/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/sn-extensions.json',
+        tag: 'sn'
+    },
+	{
+        id: 'dinosaurmod',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/dinosaurmod/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/dinosaurmod/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/dinosaurmod/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/dm-extensions.json',
+        tag: 'dm'
+    },
+	{
+        id: 'electramod',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/electramod/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/electramod/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/electramod/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/em-extensions.json',
+        tag: 'em'
+    },
+	{
+        id: 'arkide',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/arkide/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/arkide/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/arkide/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/ark-extensions.json',
+        tag: 'ark'
+    },
+    {
+        id: 'gaiamod',
+        baseURL: 'https://potentiamod.github.io/extensions/extensions/gaiamod/',
+        baseImageURL: 'https://potentiamod.github.io/extensions/img/gaiamod/',
+        baseSamplesURL: 'https://potentiamod.github.io/extensions/samples/gaiamod/',
+        metadataURL: 'https://potentiamod.github.io/extensions/data/metadata/gm-extensions.json',
+        tag: 'gaia'
+    }
+];
+
+const messages = defineMessages({
+    extensionTitle: {
+        defaultMessage: 'Choose an Extension',
+        description: 'Heading for the extension library',
+        id: 'gui.extensionLibrary.chooseAnExtension'
+    },
+    header: {
+        defaultMessage: 'Extensions',
+        description: 'Header for extension library',
+        id: 'tw.gui.extensionLibrary.header'
+    }
+});
+
+const toLibraryItem = extension => {
+    if (typeof extension === 'object') {
+        return ({
+            rawURL: extension.iconURL || extensionIcon,
+            ...extension
+        });
+    }
+    return extension;
+};
+
+const translateGalleryItem = (extension, locale) => ({
+    ...extension,
+    name: extension.nameTranslations[locale] || extension.name,
+    description: extension.descriptionTranslations[locale] || extension.description
+});
+
+const mapGalleryExtension = (extension, source) => ({
+    name: extension.name,
+    nameTranslations: extension.nameTranslations || {},
+    description: extension.description,
+    descriptionTranslations: extension.descriptionTranslations || {},
+    extensionId: extension.id,
+    extensionURL: `${source.baseURL}${extension.slug}.js`,
+    iconURL: `${source.baseImageURL}${extension.image || 'placeholder.png'}`,
+    tags: [source.tag],
+    credits: [
+            ...(extension.original || []),
+            ...(extension.by || [])
+        ].map(credit => {
+            if (credit.link) {
+                return (
+                    <a
+                        href={credit.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        key={credit.name}
+                    >
+                        {credit.name}
+                    </a>
+                );
+            }
+            return credit.name;
+        }),
+    docsURI: extension.docs ? `${source.baseURL}${extension.slug}` : null,
+    samples: extension.samples ? extension.samples.map(sample => ({
+        href: `${process.env.ROOT}editor?project_url=${source.baseSamplesURL}${encodeURIComponent(sample)}.sb3`,
+        text: sample
+    })) : null,
+    featured: true
+});
+
+let cachedGalleryBySource = null;
+
+const fetchLibrary = async () => {
+    const results = await Promise.allSettled(gallerySources.map(async source => {
+        const res = await fetch(source.metadataURL);
+        if (!res.ok) {
+            throw new Error(`[${source.id}] HTTP status ${res.status}`);
+        }
+        const data = await res.json();
+        return data.extensions.map(extension => mapGalleryExtension(extension, source));
+    }));
+
+    const extensionIds = new Set();
+    const galleryBySource = {};
+
+    for (const [index, result] of results.entries()) {
+        const source = gallerySources[index];
+
+        if (result.status === 'fulfilled') {
+            const extensions = [];
+            for (const extension of result.value) {
+                // Keep first occurrence, so PotentiaMod wins when IDs overlap.
+                if (!extensionIds.has(extension.extensionId)) {
+                    extensionIds.add(extension.extensionId);
+                    extensions.push(extension);
+                }
+            }
+            galleryBySource[source.id] = {
+                status: 'success',
+                extensions
+            };
+        } else {
+            log.error(result.reason);
+            galleryBySource[source.id] = {
+                status: 'error',
+                error: result.reason,
+                extensions: []
+            };
+        }
+    }
+
+    return galleryBySource;
+};
+
+class ExtensionLibrary extends React.PureComponent {
+    constructor (props) {
+        super(props);
+        bindAll(this, [
+            'handleItemSelect'
+        ]);
+        this.state = {
+            galleryBySource: cachedGalleryBySource,
+            galleryTimedOut: false
+        };
+    }
+    componentDidMount () {
+        if (!this.state.galleryBySource) {
+            const timeout = setTimeout(() => {
+                this.setState({
+                    galleryTimedOut: true
+                });
+            }, 750);
+
+            fetchLibrary()
+                .then(galleryBySource => {
+                    cachedGalleryBySource = galleryBySource;
+                    this.setState({
+                        galleryBySource
+                    });
+                    clearTimeout(timeout);
+                })
+                .catch(error => {
+                    log.error(error);
+                    clearTimeout(timeout);
+                });
+        }
+    }
+    handleItemSelect (item) {
+        if (item.href) {
+            return;
+        }
+
+        const extensionId = item.extensionId;
+
+        if (extensionId === 'custom_extension') {
+            this.props.onOpenCustomExtensionModal();
+            return;
+        }
+
+        const url = item.extensionURL ? item.extensionURL : extensionId;
+        if (!item.disabled) {
+            if (this.props.vm.extensionManager.isExtensionLoaded(extensionId)) {
+                this.props.onCategorySelected(extensionId);
+            } else {
+                this.props.vm.extensionManager.loadExtensionURL(url)
+                    .then(() => {
+                        this.props.onCategorySelected(extensionId);
+                    })
+                    .catch(err => {
+                        log.error(err);
+                        // eslint-disable-next-line no-alert
+                        alert(err);
+                    });
+            }
+        }
+    }
+    render () {
+        let library = null;
+        if (this.state.galleryBySource || this.state.galleryTimedOut) {
+            library = extensionLibraryContent.map(toLibraryItem);
+            library.push('---');
+
+            const locale = this.props.intl.locale;
+
+            for (const source of gallerySources) {
+                const sourceGallery = this.state.galleryBySource ? this.state.galleryBySource[source.id] : null;
+                const sourceStatusItems = galleryStatusItems[source.id];
+
+                const extensionsToExclude = [
+                    'faceSensing',
+                    'fetch',
+                    'fullscreen0419',
+                    'images',
+                    'lmsCast',
+                    'lmscomments',
+                    'lmsHackedBlocks',
+                    'lmsmcutils',
+                    'lmsutilsblocks',
+                    'RixxyX',
+                    'ShovelUtils',
+                    'shreder95resolution',
+                    'skyhigh173JSON'
+                ];
+
+                if (sourceGallery && sourceGallery.status === 'success') {
+                    library.push(toLibraryItem(sourceStatusItems.more));
+                    library.push(
+                        ...sourceGallery.extensions
+                            .filter(i => !extensionsToExclude.includes(i.extensionId))
+                            .map(i => translateGalleryItem(i, locale))
+                            .map(toLibraryItem)
+                    );
+                } else if (sourceGallery && sourceGallery.status === 'error') {
+                    library.push(toLibraryItem(sourceStatusItems.error));
+                } else {
+                    library.push(toLibraryItem(sourceStatusItems.loading));
+                }
+
+                library.push('---');
+            }
+
+            if (library[library.length - 1] === '---') {
+                library.pop();
+            }
+        }
+
+        return (
+            <LibraryComponent
+                data={library}
+                filterable
+                persistableKey="extensionId"
+                id="extensionLibrary"
+                tags={extensionTags}
+                header={this.props.intl.formatMessage(messages.header)}
+                title={this.props.intl.formatMessage(messages.extensionTitle)}
+                visible={this.props.visible}
+                onItemSelected={this.handleItemSelect}
+                onRequestClose={this.props.onRequestClose}
+            />
+        );
+    }
+}
+
+ExtensionLibrary.propTypes = {
+    intl: intlShape.isRequired,
+    onCategorySelected: PropTypes.func,
+    onOpenCustomExtensionModal: PropTypes.func,
+    onRequestClose: PropTypes.func,
+    visible: PropTypes.bool,
+    vm: PropTypes.instanceOf(VM).isRequired // eslint-disable-line react/no-unused-prop-types
+};
+
+export default injectIntl(ExtensionLibrary);
